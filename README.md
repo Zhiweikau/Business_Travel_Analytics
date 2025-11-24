@@ -14,8 +14,7 @@
 ---
 
 ## MIT License
-This project is released under the [MIT License]
-(https://github.com/Zhiweikau/Business_Travel_Analytics/blob/main/LICENSE), permitting you to freely use, modify, and share the codebase, provided that the original license and copyright notice are retained.
+This project is released under the [MIT License](https://github.com/Zhiweikau/Business_Travel_Analytics/blob/main/LICENSE), permitting you to freely use, modify, and share the codebase, provided that the original license and copyright notice are retained.
 
 ## Connect with Me
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Zhi%20Wei%20Kau-blue?logo=linkedin)](https://www.linkedin.com/in/zhi-wei-kau-945338243/)
