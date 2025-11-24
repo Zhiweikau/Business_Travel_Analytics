@@ -1,6 +1,10 @@
 # Business Travel Analytics
 ---
 
+## Workflow
+![Workflow](https://github.com/Zhiweikau/Business_Travel_Analytics/blob/main/Workflow.png)
+---
+
 ## Dashboard
 ### Flight and Hotel Overview
 ![Dashboard1](https://github.com/Zhiweikau/Business_Travel_Analytics/blob/main/Dashboard/Dashboard1.png)
