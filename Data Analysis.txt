@@ -1,0 +1,194 @@
+-- Flight Analysis:
+-- KPI: Total Flight Price, Average Flight Price and Total Number of Flights Booked.
+select
+round(sum(price_flight),2) as total_flight_price,
+round(avg(price_flight),2) as avg_flight_price,
+count(*) as total_flight_bookings
+from travel_data
+where price_flight is not null;
+
+-- Most Popular Travel Routes: Top5 Routes.
+select "from", "to", count(*) as route_count
+from travel_data
+group by "from", "to"
+order by route_count desc
+limit 5;
+
+-- Distribution of flights booked: flightType and agency. 
+SELECT 
+    "flightType",
+    COUNT(*) AS count,
+    ROUND(COUNT(*) * 100.0 / t.total_rows, 2) AS percentage
+FROM travel_data
+JOIN (
+    SELECT COUNT(*) AS total_rows
+    FROM travel_data
+) t ON TRUE
+WHERE "flightType" IS NOT NULL 
+  AND TRIM("flightType") != ''
+GROUP BY "flightType", t.total_rows
+ORDER BY count DESC;
+
+SELECT
+    agency,
+    COUNT(*) AS count,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS percentage
+FROM travel_data
+WHERE agency IS NOT NULL
+  AND TRIM(agency) != ''
+GROUP BY agency
+ORDER BY count DESC;
+
+-- Flight Cost Analysis: Total and Average price_flight by flightType, agency, and distance. 
+select
+"flightType",
+round(sum("price_flight"),2) as total_price,
+round(avg("price_flight"),2) as average_price
+from travel_data
+group by "flightType"
+order by total_price desc;
+
+select
+"agency",
+round(sum("price_flight"),2) as total_price,
+round(avg("price_flight"),2) as average_price
+from travel_data
+group by "agency"
+order by total_price desc;
+
+select
+"distance",
+round(sum("price_flight"),2) as total_price,
+round(avg("price_flight"),2) as average_price
+from travel_data
+group by "distance"
+order by total_price desc
+limit 5;
+
+-- Price Elasticity by Flight Type and Distance: Analyze average price per km by flightType. Detect pricing inefficiencies or premium threshold. Formula: price_per_km = price_flight / distance
+select
+"flightType",
+round(avg("price_flight" / "distance"), 2) as avg_price_per_km
+from travel_data
+group by "flightType"
+order by avg_price_per_km desc;
+
+-- Hotel Analysis:
+-- KPI: Total Hotel Price, Average Hotel Price and Total number of hotels booked. 
+select
+round(sum("total_price")/2,2) as total_hotel_price,
+round(sum("total_price") / (count("name_hotel")), 2) as avg_hotel_price,
+count("name_hotel") / 2 as total_hotel_bookings
+from travel_data;
+
+-- Hotel Booking Rate: How many trips included hotels. Formula = (Total number of travelCode – total number count missing values in name_hotel) / Total number of travelCode * 100. 
+SELECT
+    ROUND(
+        COUNT(CASE 
+                  WHEN "name_hotel" IS NOT NULL 
+                       AND TRIM("name_hotel") != '' 
+                  THEN 1 
+             END) * 100.0 / COUNT(*),
+        2
+    ) AS hotel_booking_rate
+FROM travel_data;
+
+-- Most Popular Hotels & Places: Distribution of name_hotel and place. 
+SELECT
+    "name_hotel",
+    COUNT(*) AS count,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) AS percentage
+FROM travel_data
+WHERE "name_hotel" IS NOT NULL 
+  AND TRIM("name_hotel") != ''
+GROUP BY "name_hotel"
+ORDER BY count DESC;
+
+SELECT
+    "place",
+    COUNT(*) AS count,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) AS percentage
+FROM travel_data
+WHERE "place" IS NOT NULL 
+  AND TRIM("place") != ''
+GROUP BY "place"
+ORDER BY count DESC;
+
+-- Hotel Stay Duration & Price: Analyze average of days, average of price_hotel and total_price for each of name_hotel.
+select
+"name_hotel",
+round(avg("days"), 2) as average_day,
+round(avg("price_hotel"), 2) as average_price_hotel,
+round(sum("total_price") / 2, 2) as total_price_hotel
+from travel_data
+where "name_hotel" is not null and trim("name_hotel") != ''
+group by "name_hotel"
+order by total_price_hotel desc
+limit 10;
+
+-- Flight-Hotel Bundling: Compare total price with and without hotel bookings. With_hotel mean that total price included the flight_price and total_price of the hotel under the condition of hotel booked, while without_hotel mean that total price of the flight_price under the condition of non-hotel is booked. 
+SELECT
+    -- Total spending for trips WITH hotel
+    Round(SUM(
+        CASE 
+            WHEN "name_hotel" IS NOT NULL AND TRIM("name_hotel") <> '' 
+            THEN "price_flight"
+            ELSE 0
+        END
+    )
+    +
+    (
+        SUM(
+            CASE 
+                WHEN "name_hotel" IS NOT NULL AND TRIM("name_hotel") <> '' 
+                THEN "total_price"
+                ELSE 0
+            END
+        ) / 2
+    ), 2) AS total_price_with_hotel,
+
+    -- Total spending for trips WITHOUT hotel
+    Round(SUM(
+        CASE 
+            WHEN "name_hotel" IS NULL OR TRIM("name_hotel") = '' 
+            THEN "price_flight"
+            ELSE 0
+        END
+    ), 2) AS total_price_without_hotel
+FROM travel_data;
+
+-- Demographic Analysis
+-- Demographic Pricing Bias: Group by gender or age groups (<25, 25–45, 45+) and Compare spending behavior.
+select
+"gender",
+round(avg("price_flight"), 2) as average_flight_price,
+round(avg("total_price"), 2) as average_total_price
+from travel_data
+group by gender;
+
+select
+	"age_group",
+	count(*) as count,
+round(avg("total_price"), 2) as average_total_price
+from(
+	select
+		case
+			when age < 25 then 'Young'
+			when age <= 45 then 'Adult'
+			else 'Senior'
+		end as age_group,
+		"total_price"
+	from travel_data
+) as t
+group by age_group
+order by count desc;
+
+-- Booking Frequency by Company: This identifies companies with the most flight bookings, hinting at corporate travel partners or repeat customers. 
+select
+"company",
+count("company") as total_bookings,
+count(Distinct "userCode") as unique_users
+from travel_data
+where "company" is not null and trim("company") != ''
+group by "company"
+order by total_bookings desc;
