@@ -6,7 +6,7 @@
 ![Dashboard1](https://github.com/Zhiweikau/Business_Travel_Analytics/blob/main/Dashboard/Dashboard1.png)
 
 ### Demographics and Corporate Analysis
-![Dashboard2(https://github.com/Zhiweikau/Business_Travel_Analytics/blob/main/Dashboard/Dashboard2.png)
+![Dashboard2](https://github.com/Zhiweikau/Business_Travel_Analytics/blob/main/Dashboard/Dashboard2.png)
 ---
 
 ## Documentation
